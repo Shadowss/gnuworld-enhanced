@@ -90,6 +90,12 @@ public:
 	/// MODE_FAKE_HOST is true if the iClient has FAKE_HOST (+f) set.
 	static const modeType	MODE_FAKE_HOST ;
 
+	/// MODE_CLOAK_HOST is true if the iClient has CLOAK_HOST (+C) set.
+	static const modeType	MODE_CLOAK_HOST ;
+
+	/// MODE_CLOAK_IP is true if the iClient has CLOAK_IP (+c) set.
+	static const modeType	MODE_CLOAK_IP ;
+
 	/// MODE_G is true if the iCilent has user mode g set.
 	static const modeType	MODE_G ;
 
@@ -148,6 +154,29 @@ public:
 		const time_t& _connectTime ) ;
 
 	/**
+	 * Construct a new iClient given a large list of
+	 * parameters for the client's state.
+	 * Used in case of Nefarious2 cloackedHost/IP
+	 */
+	iClient( const unsigned int& _uplink,
+		const std::string& _yyxxx,
+		const std::string& _nickName,
+		const std::string& _userName,
+		const std::string& _hostBase64,
+		const std::string& _insecureHost,
+		const std::string& _realInsecureHost,
+		const std::string& _mode,
+		const std::string& _account,
+		const time_t _account_ts,
+		const std::string& _description,
+		const time_t& _connectTime,
+		const std::string& _cloackHost,
+		const std::string& _cloackIP,
+		const std::string& _setHost,
+		const std::string& _fakeHost
+		) ;
+
+	/**
 	 * Destruct the iClient.
 	 * This will call xClient::deleteCustomData() for each
 	 * xClient which is storing a data element in this iClient.
@@ -179,6 +208,18 @@ public:
 	 */
 	inline const std::string& getRealInsecureHost() const
 		{ return realInsecureHost ;}
+
+	/**
+	 * Retrieve the iClient's 'cloaked' host name.
+	 */
+	inline const std::string& getCloakHost() const
+		{ return cloakHost ;}
+
+	/**
+	 * Retrieve the iClient's 'cloaked' ip.
+	 */
+	inline const std::string& getCloakIP() const
+		{ return cloakIP ;}
 
 	/**
 	 * Retrieve a string of the form: nick!user@host for this user.
@@ -215,6 +256,7 @@ public:
 		insecureHost = setHost;
 #endif
 	}
+
 	/**
 	 * This method will set the hidden host suffix.  This value
 	 * is only modified by the xServer on startup.
@@ -462,6 +504,19 @@ public:
 		{ return getMode( MODE_HIDDEN_HOST ) ; }
 
 	/**
+	 * +C cloak host, is a hidden host.
+	 */
+	inline bool isModeC() const
+		{ return getMode( MODE_CLOAK_HOST ) ; }
+
+	/**
+	 * +c cloak ip, is a hidden host.
+	 */
+	inline bool isModec() const
+		{ return getMode( MODE_CLOAK_IP ) ; }
+
+
+	/**
 	 * Return true if this client has the +g mode set, false otherwise.
 	 */
 	inline bool isModeG() const
@@ -561,6 +616,22 @@ public:
 		setMode( MODE_HIDDEN_HOST ) ;
 		if (isModeH())
 			setSetHost();
+		}
+
+	/**
+	 * Set mode +C for this user.
+	 */
+	inline void setModeC()
+		{
+		setMode( MODE_CLOAK_HOST ) ;
+		}
+
+	/**
+	 * Set mode +c for this user.
+	 */
+	inline void setModec()
+		{
+		setMode( MODE_CLOAK_IP ) ;
 		}
 
 	/**
@@ -727,6 +798,16 @@ protected:
 	 * exposed.
 	 */
 	std::string	realInsecureHost ;
+
+	/**
+	 * Nefarious2 Cloaked Host
+	 */
+	std::string cloakHost;
+
+	/**
+	 * Nefarious2 Cloaked IP
+	 */
+	std::string cloakIP;
 
 	/**
 	 * This client's 'real-name' field data.

@@ -54,6 +54,8 @@ const iClient::modeType iClient::MODE_G           = 0x0080 ;
 const iClient::modeType iClient::MODE_SERVNOTICES = 0x0100 ;
 const iClient::modeType iClient::MODE_FAKE        = 0x0200 ;
 const iClient::modeType iClient::MODE_FAKE_HOST   = 0x0400 ;
+const iClient::modeType iClient::MODE_CLOAK_HOST  = 0x0800 ;
+const iClient::modeType iClient::MODE_CLOAK_IP    = 0x1000 ;
 
 string iClient::hiddenHostSuffix( "we.all.worship.mrbean.org" ) ;
 
@@ -127,6 +129,43 @@ setModes( _mode ) ;
 customDataMap = 0 ;
 }
 
+//Nefarios2 cloackedHost/IP case construction
+iClient::iClient( const unsigned int& /* _uplink */,
+	const string& _yyxxx,
+	const string& _nickName,
+	const string& _userName,
+	const string& _hostBase64,
+	const string& _insecureHost,
+	const string& _realInsecureHost,
+	const string& _mode,
+	const string& _account,
+	const time_t _account_ts,
+	const string& _description,
+	const time_t& _connectTime,
+	const std::string& _cloakHost,
+	const std::string& _cloakIP,
+	const string& _setHost,
+	const string& _fakeHost)
+: NetworkTarget( _yyxxx ),
+	nickName( _nickName ),
+	userName( _userName ),
+	IP( xIP( _hostBase64, true ).GetLongIP() ),
+	insecureHost( _insecureHost ),
+	realInsecureHost( _realInsecureHost ),
+	description( _description),
+	connectTime( _connectTime ),
+	mode( 0 ),
+	account( _account ),
+	account_ts( _account_ts ),
+	cloakHost(_cloakHost),
+	cloakIP(_cloakIP),
+	setHost( _setHost ),
+	fakeHost( _fakeHost )
+{
+setModes( _mode ) ;
+customDataMap = 0 ;
+}
+
 iClient::~iClient()
 {
 delete customDataMap ;
@@ -186,6 +225,12 @@ for( string::size_type i = 0 ; i < newModes.size() ; i++ )
 		case 'f':
 			setFakeHost(fakeHost);
 			break ;
+		case 'C':
+			setModeC();
+			break ;
+		case 'c':
+			setModec();
+			break ;
 		case '+':
 			break ;
 		default:
@@ -232,6 +277,8 @@ if( isModeX() )		retMe += 'x' ;
 if( isModeG() )		retMe += 'g' ;
 if( isModeF() )		retMe += 'f' ;
 if( isModeH() )		retMe += 'h' ;
+if( isModeC() )		retMe += 'C' ;
+if( isModec() )		retMe += 'c' ;
 
 return retMe ;
 }
