@@ -237,6 +237,12 @@ RegisterCommand(new CANCELCommand(this, "CANCEL", "<#channel> <YES|NO>", 8));
 
 RegisterCommand(new OPCommand(this, "OP", "<#channel> [nick] [nick] ..", 3));
 RegisterCommand(new DEOPCommand(this, "DEOP", "<#channel> [nick] [nick] ..", 3));
+#ifdef USING_NEFARIOUS
+  #ifdef USE_HALFOPS
+    RegisterCommand(new HALFOPCommand(this, "HALFOP", "<#channel> [nick] [nick] ..", 3));
+    RegisterCommand(new DEHALFOPCommand(this, "DEHALFOP", "<#channel> [nick] [nick] ..", 3));
+  #endif
+#endif
 RegisterCommand(new VOICECommand(this, "VOICE", "<#channel> [nick] [nick] ..", 3));
 RegisterCommand(new DEVOICECommand(this, "DEVOICE", "<#channel> [nick] [nick] ..", 3));
 RegisterCommand(new ADDUSERCommand(this, "ADDUSER", "<#channel> <username> <access>", 8));
@@ -269,7 +275,7 @@ RegisterCommand(new SCANEMAILCommand(this, "SCANEMAIL", "<mask> [-all]", 10));
 RegisterCommand(new REMIGNORECommand(this, "REMIGNORE", "<mask>", 5));
 RegisterCommand(new REGISTERCommand(this, "REGISTER", "<#channel>", 8));
 RegisterCommand(new REMOVEALLCommand(this, "REMOVEALL", "<#channel>", 15));
-RegisterCommand(new PURGECommand(this, "PURGE", "<#channel> [-noop] <reason>", 8));
+RegisterCommand(new PURGECommand(this, "PURGE", "<username | #channel> [-noop] <reason>", 8));
 RegisterCommand(new ACCEPTCommand(this, "ACCEPT", "<#channel> <decision>", 8));
 RegisterCommand(new REJECTCommand(this, "REJECT", "<#channel> <decision>", 8));
 RegisterCommand(new RENAMECommand(this, "RENAME", "<old_username> <new_username>", 5));
@@ -515,7 +521,10 @@ void cservice::BurstChannels()
 	if (theChan->getFlag(sqlChannel::F_AUTOJOIN)) 
 		{
 		string tempModes = theChan->getChannelMode();
-		tempModes += 'R';
+		if (tempModes.empty())
+			tempModes = "+";
+		if (tempModes.find('R') == string::npos)
+			tempModes += 'R';
 		MyUplink->JoinChannel( this,
 			theChan->getName(),
 			tempModes,
@@ -3536,7 +3545,7 @@ if (timer_id == pending_timerID)
 	checkObjections();
 	checkAccepts();
 	checkRewievs();
-	checkPendingCleanups();
+	cleanUpPendings();
 
 	/*
 	 * Load a list of channels in NOTIFICATION stage and send them
@@ -4891,7 +4900,7 @@ void cservice::checkRewievs()
 
 // After a time, we cleanup de databes from old application data's: pending channels, supporters, etc
 //But this is valuable *only* for channels Accepted OR Rejected !!!
-void cservice::checkPendingCleanups()
+void cservice::cleanUpPendings()
 {
 	//If PendingsExpireTime == 0 than feature is disabled
 	if (!PendingsExpireTime) return;
@@ -6274,6 +6283,17 @@ switch( whichEvent )
 			Op(theChan, theClient);
 			break;
 			}
+
+		if (theLevel->getFlag(sqlLevel::F_AUTOHALFOP))
+			{
+			if (!(accessLevel >= level::halfop)) {
+				theLevel->removeFlag(sqlLevel::F_AUTOHALFOP);
+				break;
+			}
+			HalfOp(theChan, theClient);
+			break;
+			}
+
 
 		break;
 		}

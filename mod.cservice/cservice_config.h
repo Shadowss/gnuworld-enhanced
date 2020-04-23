@@ -121,6 +121,12 @@
 #define ALLOW_USERS_HELLO
 
 /**
+ * Define this if you want users to start channel registration process on IRC.
+ * If it's disabled they are redirected to use website registration.
+ */
+#define ALLOW_IRC_CHANREG
+
+/**
  * Define this if you want to enable the WELCOME feature.
  */
 #define USE_WELCOME
@@ -164,9 +170,21 @@
 #define USING_NEFARIOUS
 
 /**
+ * Define this if you're using gnuworld with nefarious2 ircd
+ * and want to enable halfop.
+ * Note: USING_NEFARIOUS must be enabled!
+ */
+#define USE_HALFOPS
+
+/**
  * Enable this if you don't want users to set 'exotic' hostnames
  * like with colors, etc.
  */
 #define VALIDATE_SET_HOSTNAME
+
+/**
+ * Define this if you want to enable coder-access levels in VERIFYCommand
+ */
+#define USE_CODER_LEVELS
 
 #endif // __CSERVICE_CONFIG_H

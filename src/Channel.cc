@@ -385,6 +385,24 @@ for( opVectorType::const_iterator ptr = opVector.begin() ;
 	}
 }
 
+void Channel::onModeH( const vector< std::pair< bool, ChannelUser* > >&
+	opVector )
+{
+typedef vector< std::pair< bool, ChannelUser* > > opVectorType ;
+for( opVectorType::const_iterator ptr = opVector.begin() ;
+	ptr != opVector.end() ; ++ptr )
+	{
+	if( ptr->first )
+		{
+		ptr->second->setModeH() ;
+		}
+	else
+		{
+		ptr->second->removeModeH() ;
+		}
+	}
+}
+
 void Channel::onModeV( const vector< std::pair< bool, ChannelUser* > >&
 	voiceVector )
 {
@@ -573,11 +591,12 @@ string Channel::createUniformBan( const iClient* theClient )
 	string theBan;
 	if (theClient->isModeX())
 	{
-		//Seems like Nefarious2 primarily uses the cloaked Host/IP if is present
-		if ((!theClient->getCloakIP().empty()) || (!theClient->getCloakHost().empty()))
+		if (theClient->isModeR())
+			theBan = "*!*@" + theClient->getAccount() + theClient->getHiddenHostSuffix();
+		else if ((!theClient->getCloakIP().empty()) || (!theClient->getCloakHost().empty()))
 		{
 			if (!theClient->getCloakIP().empty())
-				theBan = "*!*@" + theClient->getAccount() + theClient->getCloakIP();
+				theBan = "*!*@" + theClient->getCloakIP();
 			if (!theClient->getCloakHost().empty())
 				theBan = "*!*@" + theClient->getCloakHost();
 		}
@@ -585,7 +604,9 @@ string Channel::createUniformBan( const iClient* theClient )
 			theBan = "*!*@" + theClient->getAccount() + theClient->getHiddenHostSuffix();
 	}
 	else
+	{
 		theBan = "*!*@" + theClient->getInsecureHost();
+	}
 
 	return theBan ;
 }
